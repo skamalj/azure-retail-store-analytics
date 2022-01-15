@@ -1,0 +1,36 @@
+WITH aggquery AS
+(
+SELECT
+    MAX(DATEADD(millisecond, eventtime, '1970-01-01T00:00:00Z')) as window_time_per_store_prod,
+    System.Timestamp() AS CurrentTime,
+	store.store_id as store_id,
+	product.product_name as product_name,
+	sum(product.price * quantity) as total_sale
+FROM
+	myeventhub TIMESTAMP BY DATEADD(millisecond, eventtime, '1970-01-01T00:00:00Z')  
+GROUP BY store.store_id,product.product_name, TumblingWindow( second , 30 )
+UNION
+SELECT
+    MAX(DATEADD(millisecond, eventtime, '1970-01-01T00:00:00Z')) as window_time_per_store_prod,
+    System.Timestamp() AS CurrentTime,
+	store.store_id as store_id,
+	NULL as product_name,
+	sum(product.price * quantity) as total_sale
+FROM
+	myeventhub TIMESTAMP BY DATEADD(millisecond, eventtime, '1970-01-01T00:00:00Z')  
+GROUP BY store.store_id, TumblingWindow( second , 30 )
+UNION
+SELECT
+    MAX(DATEADD(millisecond, eventtime, '1970-01-01T00:00:00Z')) as window_time_per_store_prod,
+    System.Timestamp() AS CurrentTime,
+	NULL AS store_id,
+	NULL AS product_name,
+	sum(product.price * quantity) as total_sale
+FROM
+	myeventhub TIMESTAMP BY DATEADD(millisecond, eventtime, '1970-01-01T00:00:00Z')  
+GROUP BY  TumblingWindow( second , 30 )
+)
+
+SELECT *
+INTO YBsink
+FROM aggquery

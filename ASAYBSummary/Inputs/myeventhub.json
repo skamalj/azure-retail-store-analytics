@@ -1,0 +1,21 @@
+{
+    "Name": "myeventhub",
+    "Type": "Data Stream",
+    "DataSourceType": "Event Hub",
+    "EventHubProperties": {
+        "ServiceBusNamespace": "eventhubnswesteu",
+        "EventHubName": "source",
+        "SharedAccessPolicyName": "RootManageSharedAccessKey",
+        "SharedAccessPolicyKey": null,
+        "ConsumerGroupName": "sourcecgasa",
+        "AuthenticationMode": "ConnectionString"
+    },
+    "DataSourceCredentialDomain": "e17b23f7-d742-44e4-b7df-9fc258715cbe.StreamAnalystics",
+    "Serialization": {
+        "Type": "Json",
+        "Encoding": "UTF8"
+    },
+    "PartitionKey": null,
+    "CompressionType": "None",
+    "ScriptType": "Input"
+}

@@ -1,0 +1,14 @@
+{
+  "bindings": [
+    {
+      "type": "eventHubTrigger",
+      "name": "eventHubMessages",
+      "direction": "in",
+      "eventHubName": "sink",
+      "connection": "eventhubnswesteu_RootManageSharedAccessKey_EVENTHUB",
+      "cardinality": "one",
+      "consumerGroup": "$Default",
+      "dataType": "string"
+    }
+  ]
+}

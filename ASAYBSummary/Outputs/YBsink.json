@@ -1,0 +1,20 @@
+{
+    "Name": "YBsink",
+    "DataSourceType": "Event Hub",
+    "EventHubProperties": {
+        "ServiceBusNamespace": "eventhubnswesteu",
+        "EventHubName": "sink",
+        "SharedAccessPolicyName": "RootManageSharedAccessKey",
+        "SharedAccessPolicyKey": null,
+        "PartitionKey": "",
+        "PropertyColumns": [],
+        "AuthenticationMode": "ConnectionString"
+    },
+    "DataSourceCredentialDomain": "6a20fbca-2278-474a-a4db-ad8b133b861e.StreamAnalystics",
+    "Serialization": {
+        "Type": "Json",
+        "Encoding": "UTF8",
+        "Format": "Array"
+    },
+    "ScriptType": "Output"
+}

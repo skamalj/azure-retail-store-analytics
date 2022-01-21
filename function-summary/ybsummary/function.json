@@ -5,7 +5,7 @@
       "name": "eventHubMessages",
       "direction": "in",
       "eventHubName": "sink",
-      "connection": "eventhubnswesteu_RootManageSharedAccessKey_EVENTHUB",
+      "connection": "eventhubns.connectionstring",
       "cardinality": "one",
       "consumerGroup": "$Default",
       "dataType": "string"

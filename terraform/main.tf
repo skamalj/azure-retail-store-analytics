@@ -64,3 +64,86 @@ resource "azurerm_eventhub_consumer_group" "sourcecgasa" {
   eventhub_name       = azurerm_eventhub.source.name
   resource_group_name = azurerm_resource_group.eventshubrg.name
 }
+
+resource "azurerm_stream_analytics_job" "createaggregate" {
+  name                                     = "CreateAggregate"
+  resource_group_name                      = azurerm_resource_group.eventshubrg.name
+  location                                 = azurerm_resource_group.eventshubrg.location
+  compatibility_level                      = "1.2"
+  data_locale                              = "en-US"
+  events_late_arrival_max_delay_in_seconds = 10
+  events_out_of_order_max_delay_in_seconds = 10
+  events_out_of_order_policy               = "Drop"
+  output_error_policy                      = "Drop"
+  streaming_units                          = 3
+  transformation_query = file("../ASAYBSummary/ASAYBSummary.asaql")
+}
+
+resource "azurerm_stream_analytics_stream_input_eventhub" "asasource" {
+  name                         = "myeventhub"
+  stream_analytics_job_name    = azurerm_stream_analytics_job.createaggregate.name
+  resource_group_name          = azurerm_resource_group.eventshubrg.name
+  eventhub_consumer_group_name = azurerm_eventhub_consumer_group.sourcecgasa.name
+  eventhub_name                = azurerm_eventhub.source.name
+  servicebus_namespace         = azurerm_eventhub_namespace.eventhubns.name
+  shared_access_policy_key     = azurerm_eventhub_namespace.eventhubns.default_primary_key
+  shared_access_policy_name    = "RootManageSharedAccessKey"
+
+  serialization {
+    type     = "Json"
+    encoding = "UTF8"
+  }
+}
+
+resource "azurerm_stream_analytics_output_eventhub" "YBsink" {
+  name                      = "YBsink"
+  stream_analytics_job_name = azurerm_stream_analytics_job.createaggregate.name
+  resource_group_name       = azurerm_resource_group.eventshubrg.name
+  eventhub_name             = azurerm_eventhub.sink.name
+  servicebus_namespace      = azurerm_eventhub_namespace.eventhubns.name
+  shared_access_policy_key  = azurerm_eventhub_namespace.eventhubns.default_primary_key
+  shared_access_policy_name = "RootManageSharedAccessKey"
+
+  serialization {
+    type = "Json"
+    format = "Array"
+    encoding = "UTF8"
+  }
+}
+
+module "ybsummary" {
+  source = "./functionapp"
+  appname = "ybsummary"
+  resource_group = azurerm_resource_group.eventshubrg
+  app_settings = merge(var.app_settings, 
+    {"eventhubns.connectionstring" = azurerm_eventhub_namespace.eventhubns.default_primary_connection_string})
+}
+
+module "ybrawcql" {
+  source = "./functionapp"
+  appname = "ybrawcql"
+  resource_group = azurerm_resource_group.eventshubrg
+  app_settings = merge(var.app_settings, 
+    {"eventhubns.connectionstring" = azurerm_eventhub_namespace.eventhubns.default_primary_connection_string})
+}
+
+resource "null_resource" "example1" {
+  provisioner "local-exec" {
+    command = <<COMMANDS
+    cd ../function-summary
+    func azure functionapp fetch-app-settings ybsummary
+    func azure functionapp publish ybsummary
+    cd ../function-rawyb
+    func azure functionapp fetch-app-settings ybrawcql
+    func azure functionapp publish ybrawcql
+    az stream-analytics job start  --job-name CreateAggregate --resource-group eventshubrg
+COMMANDS
+  }
+  depends_on = [
+    module.ybsummary,
+    module.ybrawcql,
+    resource.azurerm_stream_analytics_job.createaggregate
+  ]
+}
+
+

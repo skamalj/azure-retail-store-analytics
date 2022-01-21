@@ -10,7 +10,7 @@
         "ConsumerGroupName": "sourcecgasa",
         "AuthenticationMode": "ConnectionString"
     },
-    "DataSourceCredentialDomain": "e17b23f7-d742-44e4-b7df-9fc258715cbe.StreamAnalystics",
+    "DataSourceCredentialDomain": "e61663be-c72b-49da-9cfe-6ab0ceef2504.StreamAnalystics",
     "Serialization": {
         "Type": "Json",
         "Encoding": "UTF8"

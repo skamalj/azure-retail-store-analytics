@@ -1,0 +1,10 @@
+app_settings = {
+    "yugabyte.admin-user" =  
+    "yugabyte.admin-password" = 
+    "yugabyte.host" =  
+    "yugabyte.root-crt" =  
+    "SCALE_CONTROLLER_LOGGING_ENABLED" =  "AppInsights:Verbose"
+    "FUNCTIONS_WORKER_RUNTIME" =  "node"
+    "WEBSITE_NODE_DEFAULT_VERSION" =  "~14"
+    "APPINSIGHTS_INSTRUMENTATIONKEY" = ""
+  }

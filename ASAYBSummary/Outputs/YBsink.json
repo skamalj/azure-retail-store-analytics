@@ -10,7 +10,7 @@
         "PropertyColumns": [],
         "AuthenticationMode": "ConnectionString"
     },
-    "DataSourceCredentialDomain": "6a20fbca-2278-474a-a4db-ad8b133b861e.StreamAnalystics",
+    "DataSourceCredentialDomain": "03ee48ad-868c-4c31-981f-75ac5c3c23ce.StreamAnalystics",
     "Serialization": {
         "Type": "Json",
         "Encoding": "UTF8",

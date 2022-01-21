@@ -77,6 +77,11 @@ resource "azurerm_stream_analytics_job" "createaggregate" {
   output_error_policy                      = "Drop"
   streaming_units                          = 3
   transformation_query = file("../ASAYBSummary/ASAYBSummary.asaql")
+
+  provisioner "local-exec" {
+    when = destroy
+    command = "az stream-analytics job stop  --job-name CreateAggregate --resource-group eventshubrg"
+  }
 }
 
 resource "azurerm_stream_analytics_stream_input_eventhub" "asasource" {
@@ -111,12 +116,31 @@ resource "azurerm_stream_analytics_output_eventhub" "YBsink" {
   }
 }
 
+resource "azurerm_log_analytics_workspace" "retaildemolaws" {
+  name                = "retaildemo-la-ws"
+  resource_group_name = azurerm_resource_group.eventshubrg.name
+  location            = azurerm_resource_group.eventshubrg.location
+  sku                 = "PerGB2018"
+  retention_in_days   = 30
+}
+
+resource "azurerm_application_insights" "retaildemoappinsights" {
+  name                = "retaildemo-appinsights"
+  resource_group_name = azurerm_resource_group.eventshubrg.name
+  location            = azurerm_resource_group.eventshubrg.location
+  workspace_id        = azurerm_log_analytics_workspace.retaildemolaws.id
+  application_type    = "Node.JS"
+}
+
 module "ybsummary" {
   source = "./functionapp"
   appname = "ybsummary"
   resource_group = azurerm_resource_group.eventshubrg
   app_settings = merge(var.app_settings, 
-    {"eventhubns.connectionstring" = azurerm_eventhub_namespace.eventhubns.default_primary_connection_string})
+    {
+      "eventhubns.connectionstring" = azurerm_eventhub_namespace.eventhubns.default_primary_connection_string
+      "APPINSIGHTS_INSTRUMENTATIONKEY" = azurerm_application_insights.retaildemoappinsights.instrumentation_key
+    })
 }
 
 module "ybrawcql" {
@@ -124,7 +148,10 @@ module "ybrawcql" {
   appname = "ybrawcql"
   resource_group = azurerm_resource_group.eventshubrg
   app_settings = merge(var.app_settings, 
-    {"eventhubns.connectionstring" = azurerm_eventhub_namespace.eventhubns.default_primary_connection_string})
+    {
+      "eventhubns.connectionstring" = azurerm_eventhub_namespace.eventhubns.default_primary_connection_string
+      "APPINSIGHTS_INSTRUMENTATIONKEY" = azurerm_application_insights.retaildemoappinsights.instrumentation_key
+    })
 }
 
 resource "null_resource" "example1" {
@@ -145,5 +172,6 @@ COMMANDS
     resource.azurerm_stream_analytics_job.createaggregate
   ]
 }
+
 
 

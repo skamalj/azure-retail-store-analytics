@@ -8,7 +8,7 @@
 
 ## Create all resources - functionapps, eventhubs, stream job - using terraform
 
-#### Update values.tfvars, located in terraform folder, for following values
+#### Update values.tfvars(use values.tfvars.sample as reference), located in terraform folder, for following values
 ```
 "yugabyte.admin-user" =  
 "yugabyte.admin-password" = 

@@ -77,11 +77,6 @@ resource "azurerm_stream_analytics_job" "createaggregate" {
   output_error_policy                      = "Drop"
   streaming_units                          = 3
   transformation_query = file("../ASAYBSummary/ASAYBSummary.asaql")
-
-  provisioner "local-exec" {
-    when = destroy
-    command = "az stream-analytics job stop  --job-name CreateAggregate --resource-group eventshubrg"
-  }
 }
 
 resource "azurerm_stream_analytics_stream_input_eventhub" "asasource" {
@@ -136,6 +131,7 @@ module "ybsummary" {
   source = "./functionapp"
   appname = "ybsummary"
   resource_group = azurerm_resource_group.eventshubrg
+  log_analytics_workspace_id = azurerm_log_analytics_workspace.retaildemolaws.id
   app_settings = merge(var.app_settings, 
     {
       "eventhubns.connectionstring" = azurerm_eventhub_namespace.eventhubns.default_primary_connection_string
@@ -147,31 +143,11 @@ module "ybrawcql" {
   source = "./functionapp"
   appname = "ybrawcql"
   resource_group = azurerm_resource_group.eventshubrg
+  log_analytics_workspace_id = azurerm_log_analytics_workspace.retaildemolaws.id
   app_settings = merge(var.app_settings, 
     {
       "eventhubns.connectionstring" = azurerm_eventhub_namespace.eventhubns.default_primary_connection_string
       "APPINSIGHTS_INSTRUMENTATIONKEY" = azurerm_application_insights.retaildemoappinsights.instrumentation_key
     })
 }
-
-resource "null_resource" "example1" {
-  provisioner "local-exec" {
-    command = <<COMMANDS
-    cd ../function-summary
-    func azure functionapp fetch-app-settings ybsummary
-    func azure functionapp publish ybsummary
-    cd ../function-rawyb
-    func azure functionapp fetch-app-settings ybrawcql
-    func azure functionapp publish ybrawcql
-    az stream-analytics job start  --job-name CreateAggregate --resource-group eventshubrg
-COMMANDS
-  }
-  depends_on = [
-    module.ybsummary,
-    module.ybrawcql,
-    resource.azurerm_stream_analytics_job.createaggregate
-  ]
-}
-
-
 

@@ -23,21 +23,27 @@ terraform apply  -var-file=values.tfvars -auto-approve
 terraform output source_connection_string
 ```
 
-#### Now start your [generator](https://github.com/skamalj/datagenerator) based on cconfig file provided in resources folder
-
-* Update EventHub connect string and eventhub name (which is "source" in this demo) in .env file of generator
-
-## Deploy the functions code, if you make any code changes later (Intial deployment is done by terraform)
+#### Deploy the functions code
 
 > Read about func tools [here](https://docs.microsoft.com/en-us/azure/azure-functions/functions-core-tools-reference?tabs=v2#func-azure-functionapp-fetch-app-settings)
 ```
-cd function-summary
+cd ../function-summary
 func azure functionapp fetch-app-settings ybsummary # This creates local settings file from current app settings
 func azure functionapp publish ybsummary
 cd ../function-rawyb
 func azure functionapp fetch-app-settings ybrawcql
 func azure functionapp publish ybrawcql 
 ```
+#### Start Stream Analytics Job 
+```
+az stream-analytics job start  --job-name CreateAggregate --resource-group eventshubrg
+```
+
+#### Now start your [generator](https://github.com/skamalj/datagenerator) based on cconfig file provided in resources folder
+
+* Update EventHub connect string and eventhub name (which is "source" in this demo) in .env file of generator
+
+
 ## Upload the settings, if you make any changes,  back to Azure using below command for both functions (Run from corresponding function directory)
 ```
 func azure functionapp publish ybrawcql --publish-settings-only

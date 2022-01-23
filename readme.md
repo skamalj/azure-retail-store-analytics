@@ -39,6 +39,9 @@ func azure functionapp publish ybrawcql
 az stream-analytics job start  --job-name CreateAggregate --resource-group eventshubrg
 ```
 
+#### Create tables in Yugabyte cloud - https://cloud.yugabyte.com/
+* Use definitions provided in resources/ybschema.txt
+
 #### Now start your [generator](https://github.com/skamalj/datagenerator) based on cconfig file provided in resources folder
 
 * Update EventHub connect string and eventhub name (which is "source" in this demo) in .env file of generator

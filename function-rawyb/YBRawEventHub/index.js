@@ -47,7 +47,9 @@ async function processRecords(batch,context) {
                 // prepare option is not working with jsonb column
                 return client.execute(query,[v.id, JSON.stringify(v)])}));
         }).then(result => {
-            context.log("Instance ID: " + process.env["WEBSITE_ROLE_INSTANCE_ID"])
+
+            // This is from https://docs.microsoft.com/en-us/azure/app-service/reference-app-settings?tabs=kudu%2Cdotnet
+            context.log("Function instance running on Host: " + process.env["WEBSITE_INSTANCE_ID"]);
             return context.log("Records created. Result Size: " + result.length);
         }).catch((err) => {
             return context.log("Error when inserting data "+err.stack);

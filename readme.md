@@ -2,7 +2,7 @@
 
 ![Architecture](resources/AzureEventHUb-ASA-Yugabyte-Grafana.drawio.png)
 
-### Demo and code explanation is in this blog
+### Demo and code explanation is in [this blog](https://www.kamalsblog.com/2022/01/Store-Analytics-using-Azure-Event-Hub-Stream-Analytics-Functions-Yugabyte.html)
 
 # Deploying this app
 
